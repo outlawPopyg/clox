@@ -4,8 +4,10 @@ project(interpreter C)
 set(CMAKE_C_STANDARD 11)
 
 add_executable(interpreter src/main.c
-        src/chunk.c
-        src/memory.c
-        src/debug.c
-        src/value.c
-        src/vm.c)
+        src/chunk/chunk.c
+        src/misc/memory.c
+        src/debug/debug.c
+        src/misc/value.c
+        src/vm/vm.c
+        src/compiler/compiler.c
+        src/scanner/scanner.c)

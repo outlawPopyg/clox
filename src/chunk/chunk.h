@@ -1,8 +1,8 @@
 #ifndef INTERPRETER_CHUNK_H
 #define INTERPRETER_CHUNK_H
 
-#include "common.h"
-#include "value.h"
+#include "../misc/common.h"
+#include "../misc/value.h"
 
 typedef enum {
     OP_CONSTANT,

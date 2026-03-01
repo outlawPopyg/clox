@@ -1,7 +1,7 @@
 #include <stdio.h>
 
 #include "debug.h"
-#include "value.h"
+#include "../misc/value.h"
 
 static int simpleInstruction(const char *name, int offset) {
     printf("%s\n", name);
