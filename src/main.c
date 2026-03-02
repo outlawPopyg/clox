@@ -61,8 +61,8 @@ static void runFile(const char *path) {
 int main(int argc, const char *argv[]) {
     initVM();
 
-    printf("print 1 + 2\\nprivet mir\n");
-    compile("print 1 + 2\nprivet mir");
+    // printf("print 1 + 2\\nprivet mir\n");
+    // compile("print 1 + 2\nprivet mir");
 
     freeVM();
     return 0;
