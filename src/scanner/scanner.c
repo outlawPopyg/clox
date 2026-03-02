@@ -35,8 +35,7 @@ static Token errorToken(const char *message) {
 }
 
 static char advance() {
-    scanner.current++;
-    return scanner.current[-1];
+    return *scanner.current++;
 }
 
 static bool match(char expected) {

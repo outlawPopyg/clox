@@ -4,6 +4,7 @@
 
 #include "misc/common.h"
 #include "chunk/chunk.h"
+#include "compiler/compiler.h"
 #include "debug/debug.h"
 #include "vm/vm.h"
 
@@ -60,32 +61,9 @@ static void runFile(const char *path) {
 int main(int argc, const char *argv[]) {
     initVM();
 
-    Chunk chunk;
-    initChunk(&chunk);
-
-    // пример выражения: -((1.2 + 3.4) / 5.6)
-    int constant = addConstant(&chunk, 1.2);
-    writeChunk(&chunk, OP_CONSTANT, 123);
-    writeChunk(&chunk, constant, 123);
-
-    constant = addConstant(&chunk, 3.4);
-    writeChunk(&chunk, OP_CONSTANT, 123);
-    writeChunk(&chunk, constant, 123);
-
-    writeChunk(&chunk, OP_ADD, 123);
-
-    constant = addConstant(&chunk, 5.6);
-    writeChunk(&chunk, OP_CONSTANT, 123);
-    writeChunk(&chunk, constant, 123);
-
-    writeChunk(&chunk, OP_DIVIDE, 123);
-
-    writeChunk(&chunk, OP_NEGATE, 123);
-    writeChunk(&chunk, OP_RETURN, 123);
-
-    // interpret(&chunk);
+    printf("print 1 + 2\\nprivet mir\n");
+    compile("print 1 + 2\nprivet mir");
 
     freeVM();
-    freeChunk(&chunk);
     return 0;
 }
