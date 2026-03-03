@@ -61,8 +61,9 @@ static void runFile(const char *path) {
 int main(int argc, const char *argv[]) {
     initVM();
 
-    // printf("print 1 + 2\\nprivet mir\n");
-    // compile("print 1 + 2\nprivet mir");
+    Chunk chunk;
+    initChunk(&chunk);
+    compile("-(1 + 2)", &chunk);
 
     freeVM();
     return 0;
