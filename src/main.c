@@ -63,7 +63,7 @@ int main(int argc, const char *argv[]) {
 
     Chunk chunk;
     initChunk(&chunk);
-    compile("-(1 + 2)", &chunk);
+    compile("!(5 - 4 > 3 * 2 == !nil)", &chunk);
 
     freeVM();
     return 0;
