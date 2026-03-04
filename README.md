@@ -1,4 +1,5 @@
-## Про структуры
+## Структуры
+### Выравнивание байтов
 
 ```c++
 typedef struct {
@@ -25,3 +26,24 @@ typedef struct {
 Тут будет размер 8 байт
 
 ![img.png](img.png)
+
+### Наследование структур
+
+```c++
+typedef struct {
+    uint8_t byte;
+} A;
+
+typedef struct {
+    A a;
+    bool flag;
+} B;
+
+A a = {.byte = 12};
+B b = {.a = a, .flag = true}; // в памяти будет как {a.byte, flag}
+
+A* pointerA = (A*)&b;
+printf("%d", pointerA->byte); // 12
+```
+
+Можем взять указатель родительского типа на дочерний тип
