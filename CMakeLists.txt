@@ -10,4 +10,6 @@ add_executable(interpreter src/main.c
         src/misc/value.c
         src/vm/vm.c
         src/compiler/compiler.c
-        src/scanner/scanner.c)
+        src/scanner/scanner.c
+        src/misc/object.c
+)
