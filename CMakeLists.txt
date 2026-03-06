@@ -12,4 +12,5 @@ add_executable(interpreter src/main.c
         src/compiler/compiler.c
         src/scanner/scanner.c
         src/misc/object.c
+        src/table/table.c
 )

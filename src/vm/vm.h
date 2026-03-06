@@ -3,6 +3,7 @@
 
 #include "../chunk/chunk.h"
 #include "../misc/value.h"
+#include "../table/table.h"
 
 #define STACK_MAX 256
 
@@ -12,6 +13,7 @@ typedef struct {
     Value stack[STACK_MAX]; // память для массива выделяется автоматически
     Value* stackTop;
     Obj* objects;
+    Table strings;
 } VM;
 
 typedef enum {
