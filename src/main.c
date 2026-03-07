@@ -30,7 +30,8 @@ static char *readFile(const char *path) {
     }
 
     fseek(file, 0L, SEEK_END); // переместиться в конец файла
-    size_t fileSize = ftell(file); // считаем сколько байт мы уже считали, т.к сейчас мы в конце файла, то получаем размер файла
+    size_t fileSize = ftell(file);
+    // считаем сколько байт мы уже считали, т.к сейчас мы в конце файла, то получаем размер файла
     rewind(file); // обратно в начало
 
     char *buffer = malloc(fileSize + 1); // выдяляем память под строку размером с длину файла
@@ -50,7 +51,7 @@ static char *readFile(const char *path) {
 }
 
 static void runFile(const char *path) {
-    char* sourceCode = readFile(path);
+    char *sourceCode = readFile(path);
     InterpretResult result = interpret(sourceCode);
     free(sourceCode);
 
@@ -60,10 +61,10 @@ static void runFile(const char *path) {
 
 int main(int argc, const char *argv[]) {
     initVM();
-
-    Chunk chunk;
-    initChunk(&chunk);
-    compile("!(5 - 4 > 3 * 2 == !nil)", &chunk);
+    interpret("var a = \"abc\";"
+                    "var b = a + \"cde\";"
+                    "a = b;"
+                    "print a;");
 
     freeVM();
     return 0;
