@@ -15,7 +15,7 @@ typedef struct {
     bool panicMode;
 } Parser;
 
-typedef void (*ParseFn)(bool canAssign);
+typedef void (*ParseFn)(bool canAssign); // указатель на функцию
 
 typedef enum {
     PREC_NONE,
@@ -101,7 +101,7 @@ static void error(const char *message) {
 static void advance() {
     parser.previous = parser.current;
 
-    for (;;) {
+    for (;;) { // аля try-catch в си
         parser.current = scanToken();
         if (parser.current.type != TOKEN_ERROR) break;
 
@@ -241,46 +241,46 @@ static void literal(bool canAssign) {
 }
 
 ParseRule rules[] = {
-  [TOKEN_LEFT_PAREN]    = {grouping, NULL,   PREC_NONE},
-  [TOKEN_RIGHT_PAREN]   = {NULL,     NULL,   PREC_NONE},
-  [TOKEN_LEFT_BRACE]    = {NULL,     NULL,   PREC_NONE},
-  [TOKEN_RIGHT_BRACE]   = {NULL,     NULL,   PREC_NONE},
-  [TOKEN_COMMA]         = {NULL,     NULL,   PREC_NONE},
-  [TOKEN_DOT]           = {NULL,     NULL,   PREC_NONE},
-  [TOKEN_MINUS]         = {unary,    binary, PREC_TERM},
-  [TOKEN_PLUS]          = {NULL,     binary, PREC_TERM},
-  [TOKEN_SEMICOLON]     = {NULL,     NULL,   PREC_NONE},
-  [TOKEN_SLASH]         = {NULL,     binary, PREC_FACTOR},
-  [TOKEN_STAR]          = {NULL,     binary, PREC_FACTOR},
-  [TOKEN_BANG]          = {unary,     NULL,   PREC_NONE},
-  [TOKEN_BANG_EQUAL]    = {NULL,     binary,   PREC_EQUALITY},
-  [TOKEN_EQUAL]         = {NULL,     NULL,   PREC_NONE},
-  [TOKEN_EQUAL_EQUAL]   = {NULL,     binary,   PREC_EQUALITY},
-  [TOKEN_GREATER]       = {NULL,     binary,   PREC_COMPARISON},
-  [TOKEN_GREATER_EQUAL] = {NULL,     binary,   PREC_COMPARISON},
-  [TOKEN_LESS]          = {NULL,     binary,   PREC_COMPARISON},
-  [TOKEN_LESS_EQUAL]    = {NULL,     binary,   PREC_COMPARISON},
-  [TOKEN_IDENTIFIER]    = {variable,     NULL,   PREC_NONE},
-  [TOKEN_STRING]        = {string,     NULL,   PREC_NONE},
-  [TOKEN_NUMBER]        = {number,   NULL,   PREC_NONE},
-  [TOKEN_AND]           = {NULL,     NULL,   PREC_NONE},
-  [TOKEN_CLASS]         = {NULL,     NULL,   PREC_NONE},
-  [TOKEN_ELSE]          = {NULL,     NULL,   PREC_NONE},
-  [TOKEN_FALSE]         = {literal,     NULL,   PREC_NONE},
-  [TOKEN_FOR]           = {NULL,     NULL,   PREC_NONE},
-  [TOKEN_FUN]           = {NULL,     NULL,   PREC_NONE},
-  [TOKEN_IF]            = {NULL,     NULL,   PREC_NONE},
-  [TOKEN_NIL]           = {literal,     NULL,   PREC_NONE},
-  [TOKEN_OR]            = {NULL,     NULL,   PREC_NONE},
-  [TOKEN_PRINT]         = {NULL,     NULL,   PREC_NONE},
-  [TOKEN_RETURN]        = {NULL,     NULL,   PREC_NONE},
-  [TOKEN_SUPER]         = {NULL,     NULL,   PREC_NONE},
-  [TOKEN_THIS]          = {NULL,     NULL,   PREC_NONE},
-  [TOKEN_TRUE]          = {literal,     NULL,   PREC_NONE},
-  [TOKEN_VAR]           = {NULL,     NULL,   PREC_NONE},
-  [TOKEN_WHILE]         = {NULL,     NULL,   PREC_NONE},
-  [TOKEN_ERROR]         = {NULL,     NULL,   PREC_NONE},
-  [TOKEN_EOF]           = {NULL,     NULL,   PREC_NONE},
+    [TOKEN_LEFT_PAREN]    = {grouping, NULL,   PREC_NONE},         //   (
+    [TOKEN_RIGHT_PAREN]   = {NULL,     NULL,   PREC_NONE},         //   )
+    [TOKEN_LEFT_BRACE]    = {NULL,     NULL,   PREC_NONE},         //   {
+    [TOKEN_RIGHT_BRACE]   = {NULL,     NULL,   PREC_NONE},         //   }
+    [TOKEN_COMMA]         = {NULL,     NULL,   PREC_NONE},         //   ,
+    [TOKEN_DOT]           = {NULL,     NULL,   PREC_NONE},         //   .
+    [TOKEN_MINUS]         = {unary,    binary, PREC_TERM},         //   -
+    [TOKEN_PLUS]          = {NULL,     binary, PREC_TERM},         //   +
+    [TOKEN_SEMICOLON]     = {NULL,     NULL,   PREC_NONE},         //   ;
+    [TOKEN_SLASH]         = {NULL,     binary, PREC_FACTOR},       //   /
+    [TOKEN_STAR]          = {NULL,     binary, PREC_FACTOR},       //   *
+    [TOKEN_BANG]          = {unary,     NULL,   PREC_NONE},        //   !
+    [TOKEN_BANG_EQUAL]    = {NULL,     binary,   PREC_EQUALITY},   //   !=
+    [TOKEN_EQUAL]         = {NULL,     NULL,   PREC_NONE},         //   =
+    [TOKEN_EQUAL_EQUAL]   = {NULL,     binary,   PREC_EQUALITY},   //   ==
+    [TOKEN_GREATER]       = {NULL,     binary,   PREC_COMPARISON}, //   >
+    [TOKEN_GREATER_EQUAL] = {NULL,     binary,   PREC_COMPARISON}, //   >=
+    [TOKEN_LESS]          = {NULL,     binary,   PREC_COMPARISON}, //   <
+    [TOKEN_LESS_EQUAL]    = {NULL,     binary,   PREC_COMPARISON}, //   <=
+    [TOKEN_IDENTIFIER]    = {variable,     NULL,   PREC_NONE},     //   идентификатор
+    [TOKEN_STRING]        = {string,     NULL,   PREC_NONE},       //   "
+    [TOKEN_NUMBER]        = {number,   NULL,   PREC_NONE},         //   число
+    [TOKEN_AND]           = {NULL,     NULL,   PREC_NONE},         //   &
+    [TOKEN_CLASS]         = {NULL,     NULL,   PREC_NONE},         //   class
+    [TOKEN_ELSE]          = {NULL,     NULL,   PREC_NONE},         //   else
+    [TOKEN_FALSE]         = {literal,     NULL,   PREC_NONE},      //   false
+    [TOKEN_FOR]           = {NULL,     NULL,   PREC_NONE},         //   for
+    [TOKEN_FUN]           = {NULL,     NULL,   PREC_NONE},         //   fun
+    [TOKEN_IF]            = {NULL,     NULL,   PREC_NONE},         //   if
+    [TOKEN_NIL]           = {literal,     NULL,   PREC_NONE},      //   nil
+    [TOKEN_OR]            = {NULL,     NULL,   PREC_NONE},         //   or
+    [TOKEN_PRINT]         = {NULL,     NULL,   PREC_NONE},         //   print
+    [TOKEN_RETURN]        = {NULL,     NULL,   PREC_NONE},         //   return
+    [TOKEN_SUPER]         = {NULL,     NULL,   PREC_NONE},         //   super
+    [TOKEN_THIS]          = {NULL,     NULL,   PREC_NONE},         //   this
+    [TOKEN_TRUE]          = {literal,     NULL,   PREC_NONE},      //   true
+    [TOKEN_VAR]           = {NULL,     NULL,   PREC_NONE},         //   var
+    [TOKEN_WHILE]         = {NULL,     NULL,   PREC_NONE},         //   while
+    [TOKEN_ERROR]         = {NULL,     NULL,   PREC_NONE},         //   error
+    [TOKEN_EOF]           = {NULL,     NULL,   PREC_NONE},         //   eof
 };
 
 static ParseRule* getRule(TokenType type) {
@@ -309,7 +309,7 @@ static void synchronize() {
     }
 }
 
-// a = b;
+// 1 + + 2 - 1;
 static void parsePrecedence(Precedence precedence) {
     advance();
     ParseFn prefixRule = getRule(parser.previous.type)->prefix;
