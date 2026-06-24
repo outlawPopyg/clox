@@ -223,3 +223,4 @@ static void parsePrecedence(Precedence precedence) {
 9. Выходим из grouping и попадаем в parsePrecedence(MULTIPLY + 1). Проверяем PREC_MULTIPLY > PREC_NONE. Выходим и ставим умножение
 
 итого `OP_CONST 2, OP_CONST 1, OP_CONST 2, OP_ADD, OP_MULTIPLY`
+
