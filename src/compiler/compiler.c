@@ -309,7 +309,7 @@ static void synchronize() {
     }
 }
 
-// 1 + + 2 - 1;
+// a + 2 * 1 = 3;
 static void parsePrecedence(Precedence precedence) {
     advance();
     ParseFn prefixRule = getRule(parser.previous.type)->prefix;
@@ -410,12 +410,13 @@ static bool identifiersEqual(Token* a, Token* b) {
 }
 
 static void declareVariable() {
-    if (current->scopeDepth == 0) return;
+    if (current->scopeDepth == 0) return; // если глобальная
 
     Token* name = &parser.previous;
     for (int i = current->localCount - 1; i >= 0; i--) {
         Local* local = &current->locals[i];
         if (local->depth != -1 && local->depth < current->scopeDepth) {
+            // если встречаем локальную переменную уровнем выше то дальше проверять смысла нет
             break;
         }
 
