@@ -527,15 +527,19 @@ static void parsePrecedence(Precedence precedence) {
         return;
     }
 
-    bool canAssign = precedence <= PREC_ASSIGMENT;
-    prefixRule(canAssign);
+    bool canAssign = precedence <= PREC_ASSIGMENT; // если тут мы получили true, значит теоретически можно присваивать
+    prefixRule(canAssign); // тут просиходит присваивание
     while (precedence <= getRule(parser.current.type)->precedence) {
         advance();
         ParseFn infixRule = getRule(parser.previous.type)->infix;
         infixRule(canAssign);
     }
-
-    if (canAssign && match(TOKEN_EQUAL)) {
+    
+    // проверяем что если после вызова prefixRule у нас все еще стоит ссылка на "=" значит присваивание не произошло
+    // если у нас выражение типа такого "a + 1 * 3 = 1" то ошибка invalid assigment не вышла бы после всего выражения 
+    // проверка стоит после while, чтобы сначала разобрать все операторы с приоритетом выше assignment,
+    // а потом увидеть, не остался ли после всего выражения знак "="
+    if (canAssign && match(TOKEN_EQUAL)) { 
         error("Invalid assigment target.");
     }
 }
@@ -591,6 +595,137 @@ case OP_GET_LOCAL: {
 case OP_SET_LOCAL: {
     uint8_t slot = READ_BYTE();
     vm.stack[slot] = peek(0);
+    break;
+}
+```
+
+### Глобальные перменные
+
+Глобальные переменные хранятся не в стеке а в runtime хеш мапе. Глобальные переменные можно использовать до их
+фактического объявления в коде. То есть например
+
+```text
+fun() {
+    a = 1;
+}
+
+var a;
+fun();
+```
+
+То есть компилятор сначала считает ф-ию где есть необъявленная переменная 'a' но в чанк положит просто OP_GET_GLOBAL <constant pool index>
+Самое главное чтобы в рантайме когда мы дошли до этого места эта переменная была объявлена.
+Поэтому в отличие от локальных переменных которые инициализируются лишь флагом, глобальные перменные объявляются отдельной командой.
+
+Когда мы работаем с локальными перменными внутри блока, то мы точно знаем на этапе компиляции сколько их и какие именно имена.
+Поэтому у нас есть такая штука как временный массив, потому что мы точно знаем на этапе компиляции что на данной конкретной строчке кода в стеке будет
+лежать такая-то переменная на таком то месте.
+
+Во время рантайма никакого временного массива уже не будет. Поэтому тут связь имеено что "временный массив" --> "runtime стек". А не наоборот
+Стек ничего не знает про временный массив.
+
+#### Объявление
+
+```c++
+static void varDeclaration() {
+    uint8_t global = parseVariable("Expect variable name."); // --> заходим сюда
+
+    if (match(TOKEN_EQUAL)) {
+        expression();
+    } else {
+        emitByte(OP_NIL);
+    }
+
+    consume(TOKEN_SEMICOLON, "Expect ';' after variable declaration");
+
+    defineVariable(global);
+}
+
+static uint8_t parseVariable(const char* errorMessage) {
+    consume(TOKEN_IDENTIFIER, errorMessage);
+
+    declareVariable();
+    if (current->scopeDepth > 0) return 0;
+
+    return identifierConstant(&parser.previous); // --> заходим сюда
+}
+
+static uint8_t identifierConstant(Token* name) {
+    return makeConstant(OBJ_VAL(copyString(name->start, name->length)));
+}
+```
+
+Тут мы создаем константу по имени глобальной переменной и кладем ее в пул констант. Нам возвращается индекс из пула.
+Дальше все аналогично локальным переменным. Проверяется есть ли знак присваивания после переменной, если есть то парсим
+выражение, иначе кладем nil. В конце в чанк кладем OP_DEFINE_GLOBAL <index>
+
+```c++
+static void defineVariable(uint8_t global) {
+    if (current->scopeDepth > 0) {
+        markInitialized();
+        return;
+    }
+    emitBytes(OP_DEFINE_GLOBAL, global);
+}
+```
+
+В рантайме соответственно мы получаем строку из пула констант и кладем ее в хеш таблицу со значением равным либо nil либо результат выражения.
+
+```c++
+case OP_DEFINE_GLOBAL: {
+    ObjString* name = READ_STRING();
+    tableSet(&vm.globals, name, pop());
+    break;
+}
+```
+
+#### Получение/Установка
+
+get/set операции повторно вызывают identifierConstant то есть кладует еще одну запись в пул констант уже соответственно
+с другим индексом и далее все аналогично локальным перменным.
+Важная деталь - сначала проверяется есть ли локальная переменная с таким именем и если нет, то тогда 
+уже мы считаем что это глобальная переменная. Если же это не так то ошибка будет уже в рантайме.
+
+```c++
+static void namedVariable(Token name, bool canAssign) {
+    uint8_t getOp, setOp;
+    int arg = resolveLocal(current, &name);
+    if (arg != -1) {
+        getOp = OP_GET_LOCAL;
+        setOp = OP_SET_LOCAL;
+    } else {
+        arg = identifierConstant(&name);
+        getOp = OP_GET_GLOBAL;
+        setOp = OP_SET_GLOBAL;
+    }
+
+    if (canAssign && match(TOKEN_EQUAL)) {
+        expression();
+        emitBytes(setOp, (uint8_t) arg);
+    } else {
+        emitBytes(getOp, (uint8_t) arg);
+    }
+}
+```
+
+```c++
+case OP_GET_GLOBAL: {
+    ObjString* name = READ_STRING();
+    Value value;
+    if (!tableGet(&vm.globals, name, &value)) { // если мы пытаем получить необъявленную перменную
+        runtimeError("Undefined variable '%s'.", name->chars);
+        return INTERPRET_RUNTIME_ERROR;
+    }
+    push(value);
+    break;
+}
+case OP_SET_GLOBAL: {
+    ObjString* name = READ_STRING();
+    if (tableSet(&vm.globals, name, peek(0))) { // tableSet возвращает true, если ключ name - новый --> переменная была ранее необъявлена
+        tableDelete(&vm.globals, name);
+        runtimeError("Undefined variable '%s'.", name->chars);
+        return INTERPRET_RUNTIME_ERROR;
+    }
     break;
 }
 ```
