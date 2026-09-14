@@ -62,10 +62,8 @@ static void runFile(const char *path) {
 
 int main(int argc, const char *argv[]) {
     initVM();
-    interpret("var a = \"abc\";"
-                    "var b = a + \"cde\";"
-                    "a = b;"
-                    "print a;");
+    interpret("fun a() { return clock(); }"
+              "print a();");
 
     freeVM();
     return 0;
