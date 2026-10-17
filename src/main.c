@@ -62,8 +62,19 @@ static void runFile(const char *path) {
 
 int main(int argc, const char *argv[]) {
     initVM();
-    interpret("fun a() { return clock(); }"
-              "print a();");
+    interpret(
+        "fun makeClosure(value) {"
+                 "fun closure() {"
+                    "print value;"
+                 "}"
+                "return closure;"
+              "}"
+
+              "var doughnut = makeClosure(\"doughnut\");"
+              "var bagel = makeClosure(\"bagel\");"
+              "doughnut();"
+              "bagel();"
+);
 
     freeVM();
     return 0;
