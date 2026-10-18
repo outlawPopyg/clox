@@ -63,54 +63,16 @@ static void runFile(const char *path) {
 int main(int argc, const char *argv[]) {
     initVM();
     interpret(
-        "fun makeClosure(value) {"
-                 "fun closure() {"
-                    "print value;"
-                 "}"
-                "return closure;"
+        "fun outer() {"
+                "var x = \"outside\";"
+                "fun inner() {"
+                    "print x;"
+                "}"
+                "inner();"
               "}"
-
-              "var doughnut = makeClosure(\"doughnut\");"
-              "var bagel = makeClosure(\"bagel\");"
-              "doughnut();"
-              "bagel();"
+              "outer();"
 );
 
     freeVM();
     return 0;
 }
-
-//0 OP_CONST
-//1 loopstart
-//1 OP_CONST
-//2 OP_ADD
-//3 OP_ADD
-//4 OP_LOOP
-//5 0xff
-//6 0xff
-//7 OP_CONST
-
-
-//0 OP_JUMP
-//1 0xff
-//2 0xff
-//3 OP_CONST
-//4 OP_ADD
-//5 OP_ADD
-// patch
-//6 OP_CONST
-// 00000010 00000000
-
-//0
-//1 OP_CONST
-//2 OP_ADD
-//3 OP_ADD
-//4 OP_CONST
-//5 OP_JUMP_IF_FALSE
-//6 0xff
-//7 0xff
-//8 OP_POP
-// statement
-//9 OP_LOOP
-//10 11
-//11 11

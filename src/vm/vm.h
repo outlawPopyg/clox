@@ -22,6 +22,7 @@ typedef struct {
     Value stack[STACK_MAX]; // память для массива выделяется автоматически
     Value* stackTop;
     Obj* objects;
+    ObjUpvalue* openUpvalues;
     Table strings;
     Table globals;
 } VM;
