@@ -150,7 +150,8 @@ static ObjUpvalue* captureUpvalue(Value* local) {
     } else {
         prevUpvalue->next = createdUpvalue;
     }
-    return upvalue;
+
+    return createdUpvalue;
 }
 
 static void closeUpvalues(Value* last) {

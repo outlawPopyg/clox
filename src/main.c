@@ -63,14 +63,22 @@ static void runFile(const char *path) {
 int main(int argc, const char *argv[]) {
     initVM();
     interpret(
-        "fun outer() {"
-                "var x = \"outside\";"
-                "fun inner() {"
-                    "print x;"
-                "}"
-                "inner();"
-              "}"
-              "outer();"
+    "var globalSet;"
+"var globalGet;"
+
+"fun main() {"
+"var a = \"initial\";"
+
+"fun set() { a = \"updated\"; }"
+"fun get() { print a; }"
+
+"globalSet = set;"
+"globalGet = get;"
+"}"
+
+"main();"
+"globalSet();"
+"globalGet();"
 );
 
     freeVM();
