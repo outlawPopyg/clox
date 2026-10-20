@@ -63,22 +63,22 @@ static void runFile(const char *path) {
 int main(int argc, const char *argv[]) {
     initVM();
     interpret(
-    "var globalSet;"
-"var globalGet;"
+      "var globalSet;"
+            "var globalGet;"
 
-"fun main() {"
-"var a = \"initial\";"
+            "fun main() {"
+                "var a = \"initial\";"
 
-"fun set() { a = \"updated\"; }"
-"fun get() { print a; }"
+                "fun set() { a = \"updated\"; }"
+                "fun get() { print a; }"
 
-"globalSet = set;"
-"globalGet = get;"
-"}"
+                "globalSet = set;"
+                "globalGet = get;"
+            "}"
 
-"main();"
-"globalSet();"
-"globalGet();"
+            "main();"
+            "globalSet();"
+            "globalGet();"
 );
 
     freeVM();
