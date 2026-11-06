@@ -21,9 +21,9 @@ void* reallocate(void* pointer, size_t oldSize, size_t newSize) {
 #endif
     }
 
-    if (vm.bytesAllocated > vm.nextGC) {
-        collectGarbage();
-    }
+//    if (vm.bytesAllocated > vm.nextGC) {
+//        collectGarbage();
+//    }
 
     if (newSize == 0) {
         free(pointer);
@@ -159,7 +159,7 @@ void markObject(Obj *obj) {
     }
 
 #ifdef DEBUG_LOG_GC
-    printf("%p mark", (void*) obj);
+    printf("%p mark ", (void*) obj);
     printValue(OBJ_VAL(obj));
     printf("\n");
 #endif
