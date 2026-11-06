@@ -98,12 +98,6 @@ static void markRoots() {
     for (int i = 0; i < vm.frameCount; i++) {
         markObject((Obj*) vm.frames[i].closure);
     }
-
-    for (ObjUpvalue *upvalue = vm.openUpvalues;
-         upvalue != NULL;
-         upvalue = upvalue->next) {
-        markObject((Obj*) upvalue);
-    }
 }
 
 static void markArray(ValueArray* array) {
@@ -147,6 +141,17 @@ static void traceReferences() {
     while (vm.grayCount > 0) {
         Obj* object = vm.grayStack[--vm.grayCount];
         blackenObject(object);
+    }
+}
+
+static void removeUnusedUpvalues() {
+    ObjUpvalue** upvalue = &vm.openUpvalues;
+    while (upvalue != NULL) {
+        if ((*upvalue)->obj.isMarked) {
+            upvalue = &(*upvalue)->next;
+        } else {
+            *upvalue = (*upvalue)->next;
+        }
     }
 }
 
@@ -208,6 +213,7 @@ void collectGarbage() {
     markRoots();
     traceReferences();
     tableRemoveWhite(&vm.strings);
+    removeUnusedUpvalues();
     sweep();
 
     vm.nextGC = vm.bytesAllocated * GC_HEAP_GROW_FACTOR;
