@@ -5,5 +5,6 @@
 #include "../misc/object.h"
 
 ObjFunction* compile(const char *source);
+void markCompilerRoots();
 
 #endif //INTERPRETER_COMPILER_H

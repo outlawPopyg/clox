@@ -2,6 +2,7 @@
 #define INTERPRETER_MEMORY_H
 
 #include "common.h"
+#include "value.h"
 
 #define GROW_CAPACITY(capacity) \
     ((capacity) < 8 ? 8 : (capacity) * 2)
@@ -17,5 +18,8 @@
 
 void *reallocate(void *pointer, size_t oldSize, size_t newSize);
 void freeObjects();
+void collectGarbage();
+void markValue(Value value);
+void markObject(Obj* obj);
 
 #endif //INTERPRETER_MEMORY_H

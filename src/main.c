@@ -62,6 +62,7 @@ static void runFile(const char *path) {
 
 int main(int argc, const char *argv[]) {
     initVM();
+    /*
     interpret(
       "var globalSet;"
             "var globalGet;"
@@ -80,6 +81,7 @@ int main(int argc, const char *argv[]) {
             "globalSet();"
             "globalGet();"
 );
+*/
 
     freeVM();
     return 0;
