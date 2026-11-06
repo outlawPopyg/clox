@@ -17,13 +17,13 @@ void* reallocate(void* pointer, size_t oldSize, size_t newSize) {
 
     if (newSize > oldSize) {
 #ifdef DEBUG_STRESS_GC
-        collectGarbage();
+        gc();
 #endif
     }
 
-//    if (vm.bytesAllocated > vm.nextGC) {
-//        collectGarbage();
-//    }
+    if (vm.bytesAllocated > vm.nextGC) {
+        gc();
+    }
 
     if (newSize == 0) {
         free(pointer);
@@ -204,7 +204,7 @@ static void sweep() {
     }
 }
 
-void collectGarbage() {
+void gc() {
 #ifdef DEBUG_LOG_GC
     printf("-- gc begin\n");
     size_t before = vm.bytesAllocated;
