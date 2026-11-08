@@ -32,20 +32,20 @@ struct Obj {
     Obj* next;
 };
 
-struct ObjString {
+typedef struct {
     Obj obj;
     int length;
     char* chars;
     uint32_t hash;
-};
+} ObjString;
 
-struct ObjFunction {
+typedef struct {
     Obj obj;
     int arity;
     int upvalueCount;
     Chunk chunk;
     ObjString* name;
-};
+} ObjFunction;
 
 typedef Value (*NativeFn)(int argCount, Value* args);
 typedef struct {

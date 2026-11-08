@@ -3,9 +3,7 @@
 
 #include "common.h"
 
-typedef struct Obj Obj;
-typedef struct ObjString ObjString;
-typedef struct ObjFunction ObjFunction;
+typedef struct Obj Obj; // чтобы не было кольцевой зав-ти от object.h
 
 typedef enum {
     VAL_BOOL,
