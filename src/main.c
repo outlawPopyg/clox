@@ -63,24 +63,30 @@ static void runFile(const char *path) {
 int main(int argc, const char *argv[]) {
     initVM();
 
-    interpret(
-      "var globalSet;"
-            "var globalGet;"
+//    interpret(
+//      "var globalSet;"
+//            "var globalGet;"
+//
+//            "fun main() {"
+//                "var a = \"initial\";"
+//
+//                "fun set() { a = \"updated\"; }"
+//                "fun get() { print a; }"
+//
+//                "globalSet = set;"
+//                "globalGet = get;"
+//            "}"
+//
+//            "main();"
+//            "globalSet();"
+//            "globalGet();"
+//    );
 
-            "fun main() {"
-                "var a = \"initial\";"
-
-                "fun set() { a = \"updated\"; }"
-                "fun get() { print a; }"
-
-                "globalSet = set;"
-                "globalGet = get;"
-            "}"
-
-            "main();"
-            "globalSet();"
-            "globalGet();"
-);
+    interpret("class Pair {}\n"
+              "var pair = Pair();\n"
+              "pair.first = 1;\n"
+              "pair.second = 2;\n"
+              "print pair.first + pair.second;");
 
 
     freeVM();

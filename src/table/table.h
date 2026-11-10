@@ -2,7 +2,7 @@
 #define INTERPRETER_TABLE_H
 
 #include "../misc/common.h"
-#include "../misc/object.h"
+#include "../misc/value.h"
 
 typedef struct {
     ObjString* key;

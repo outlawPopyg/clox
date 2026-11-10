@@ -4,6 +4,7 @@
 #include "common.h"
 
 typedef struct Obj Obj; // чтобы не было кольцевой зав-ти от object.h
+typedef struct ObjString ObjString;
 
 typedef enum {
     VAL_BOOL,
