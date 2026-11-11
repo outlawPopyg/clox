@@ -52,6 +52,8 @@ typedef struct {
 
 typedef enum {
     TYPE_FUNCTION,
+    TYPE_METHOD,
+    TYPE_INITIALIZER,
     TYPE_SCRIPT
 } FunctionType;
 
@@ -67,9 +69,14 @@ typedef struct Compiler {
     Upvalue upvalues[UINT8_COUNT];
 } Compiler;
 
+typedef struct ClassCompiler {
+    struct ClassCompiler* enclosing;
+} ClassCompiler;
+
 Parser parser;
 Chunk *compilingChunk;
 Compiler* current = NULL;
+ClassCompiler* currentClass = NULL;
 
 static Chunk *currentChunk() {
     return &current->function->chunk;
@@ -85,7 +92,11 @@ static void emitBytes(uint8_t byte1, uint8_t byte2) {
 }
 
 static void emitReturn() {
-    emitByte(OP_NIL);
+    if (current->type == TYPE_INITIALIZER) {
+        emitBytes(OP_GET_LOCAL, 0);
+    } else {
+        emitByte(OP_NIL);
+    }
     emitByte(OP_RETURN);
 }
 
@@ -173,9 +184,14 @@ static void initCompiler(Compiler* compiler, FunctionType type) {
 
     Local* local = &current->locals[current->localCount++];
     local->depth = 0;
-    local->name.start = "";
-    local->name.length = 0;
     local->isCaptured = false;
+    if (type != TYPE_FUNCTION) {
+        local->name.start = "this";
+        local->name.length = 4;
+    } else {
+        local->name.start = "";
+        local->name.length = 0;
+    }
 }
 
 static void number(bool canAssign) {
@@ -352,9 +368,20 @@ static void dot(bool canAssign) {
     if (canAssign && match(TOKEN_EQUAL)) {
         expression();
         emitBytes(OP_SET_PROPERTY, name);
+    } else if (match(TOKEN_LEFT_PAREN)) {
+        uint8_t argCount = argumentList();
+        emitBytes(OP_INVOKE, name);
+        emitByte(argCount);
     } else {
         emitBytes(OP_GET_PROPERTY, name);
     }
+}
+
+static void this_(bool canAssign) {
+    if (currentClass == NULL) {
+        error("Can't use 'this' outside of a class");
+    }
+    variable(false);
 }
 
 ParseRule rules[] = {
@@ -392,7 +419,7 @@ ParseRule rules[] = {
     [TOKEN_PRINT]         = {NULL,     NULL,   PREC_NONE},         //   print
     [TOKEN_RETURN]        = {NULL,     NULL,   PREC_NONE},         //   return
     [TOKEN_SUPER]         = {NULL,     NULL,   PREC_NONE},         //   super
-    [TOKEN_THIS]          = {NULL,     NULL,   PREC_NONE},         //   this
+    [TOKEN_THIS]          = {this_,     NULL,   PREC_NONE},         //   this
     [TOKEN_TRUE]          = {literal,     NULL,   PREC_NONE},      //   true
     [TOKEN_VAR]           = {NULL,     NULL,   PREC_NONE},         //   var
     [TOKEN_WHILE]         = {NULL,     NULL,   PREC_NONE},         //   while
@@ -608,6 +635,9 @@ static void returnStatement() {
     if (match(TOKEN_SEMICOLON)) {
         emitReturn();
     } else {
+        if (current->type == TYPE_INITIALIZER) {
+            error("Can't return value from an initializer");
+        }
         expression();
         consume(TOKEN_SEMICOLON, "Expect ';' after return value");
         emitByte(OP_RETURN);
@@ -752,8 +782,8 @@ static void function(FunctionType type) {
     emitBytes(OP_CLOSURE, makeConstant(OBJ_VAL(function))); // в чанк внешней ф-ии добавляем созданную
 
     for (int i = 0; i < function->upvalueCount; i++) {
-        emitByte(compiler.upvalues[i].isLocal ? 1 : 0);
-        emitByte(compiler.upvalues[i].index);
+        emitBytes(compiler.upvalues[i].isLocal ? 1 : 0,
+                  compiler.upvalues[i].index);
     }
 }
 
@@ -765,17 +795,43 @@ static void funDeclaration() {
 
 }
 
+static void method() {
+    consume(TOKEN_IDENTIFIER, "Expect method name");
+    uint8_t name = identifierConstant(&parser.previous);
+
+    FunctionType type = TYPE_METHOD;
+    if (parser.previous.length == 4 && memcmp(parser.previous.start, "init", 4) == 0) {
+        type = TYPE_INITIALIZER;
+    }
+    function(type);
+    emitBytes(OP_METHOD, name);
+}
+
 static void classDeclaration() {
     consume(TOKEN_IDENTIFIER, "Expect class name.");
+    Token className = parser.previous;
+
     uint8_t nameConst = identifierConstant(&parser.previous);
     declareVariable();
 
     emitBytes(OP_CLASS, nameConst);
     defineVariable(nameConst);
 
+    ClassCompiler classCompiler;
+    classCompiler.enclosing = currentClass;
+    currentClass = &classCompiler;
+
+    namedVariable(className, false);
     consume(TOKEN_LEFT_BRACE, "Expect '{' before class body");
 
+    while (!check(TOKEN_RIGHT_BRACE) && !check(TOKEN_EOF)) {
+        method();
+    }
+
     consume(TOKEN_RIGHT_BRACE, "Expect '}' after class body");
+    emitByte(OP_POP);
+
+    currentClass = currentClass->enclosing;
 }
 
 static void declaration() {

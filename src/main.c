@@ -82,11 +82,35 @@ int main(int argc, const char *argv[]) {
 //            "globalGet();"
 //    );
 
-    interpret("class Pair {}\n"
-              "var pair = Pair();\n"
-              "pair.first = 1;\n"
-              "pair.second = 2;\n"
-              "print pair.first + pair.second;");
+//    interpret("class Pair {}\n"
+//              "var pair = Pair();\n"
+//              "pair.first = 1;\n"
+//              "pair.second = 2;\n"
+//              "print pair.first + pair.second;");
+
+//    interpret("class Scone {\n"
+//              "  topping(first, second) {\n"
+//              "    print \"scone with \" + first + \" and \" + second;\n"
+//              "  }\n"
+//              "}\n"
+//              "\n"
+//              "var scone = Scone();\n"
+//              "scone.topping(\"berries\", \"cream\");");
+
+
+    interpret("class CoffeeMaker {"
+              "  init(coffee) {"
+              "    this.coffee = coffee;"
+              "  }"
+              ""
+              "  brew() {"
+              "    print \"Enjoy your cup of \" + this.coffee;"
+              "    // No reusing the grounds!"
+              "    this.coffee = nil;"
+              "  }"
+              "}"
+              "var maker = CoffeeMaker(\"coffee and chicory\");"
+              "maker.brew();");
 
 
     freeVM();

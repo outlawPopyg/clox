@@ -33,6 +33,8 @@ typedef struct {
     ObjUpvalue* openUpvalues;
     Table strings;
     Table globals;
+
+    ObjString* initString;
 } VM;
 
 typedef enum {
